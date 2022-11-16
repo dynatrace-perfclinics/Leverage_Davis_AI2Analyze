@@ -1,0 +1,67 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: loadgeneratorservice
+spec:
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: otel-demo
+        app.kubernetes.io/instance: otel-demo-loadgeneratorservice
+        app.kubernetes.io/component: loadgeneratorservice-test
+    spec:
+      terminationGracePeriodSeconds: 5
+      restartPolicy: OnFailure
+      containers:
+        - name: loadgeneratorservice-test
+          image: hrexed/otel-demo:v1.1.0-loadgeneratorservice
+          imagePullPolicy: Always
+          ports:
+            - name: locust
+              containerPort: 8089
+          env:
+            - name: OTEL_SERVICE_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: 'metadata.labels[''app.kubernetes.io/component'']'
+            - name: OTEL_K8S_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.namespace
+            - name: OTEL_K8S_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: spec.nodeName
+            - name: OTEL_K8S_POD_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.name
+            - name: OTEL_RESOURCE_ATTRIBUTES
+              value: service.name=$(OTEL_SERVICE_NAME),k8s.namespace.name=$(OTEL_K8S_NAMESPACE),k8s.node.name=$(OTEL_K8S_NODE_NAME),k8s.pod.name=$(OTEL_K8S_POD_NAME)
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://oteld-collector.default.svc.cluster.local:4317"
+            - name: LOCUST_WEB_PORT
+              value: '8089'
+            - name: LOCUST_HOST
+              value: http://frontend
+            - name: LOCUST_HEADLESS
+              value: 'false'
+            - name: LOCUST_AUTOSTART
+              value: 'true'
+            - name: LOCUST_AUTOQUIT
+              value: "1"
+            - name: PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION
+              value: "python"
+            - name: FRONTEND_ADDR
+              value: "frontend"
+          resources:
+            requests:
+              cpu: 80m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 512Mi
