@@ -142,7 +142,6 @@ Once you have your Tenant save the Dynatrace (including https) tenant URL in the
 DT_TENANT_URL=<YOUR TENANT URL>
 ```
 
-
 #### 2. Create the Dynatrace API Tokens
 The dynatrace operator will require to have several tokens:
 * Token to deploy and configure the various components
@@ -159,11 +158,12 @@ Create a Dynatrace token ( left menu Access TOken/Create a new token), this toke
 * Write configuration
 * Paas integration - installer downloader
 <p align="center"><img src="/image/operator_token.png" width="40%" alt="operator token" /></p>
-
-Save the value of the token . We will use it later to store in a k8S secret
+    
+ Save the value of the token . We will use it later to store in a k8S secret
 ```
 DYNATRACE_API_TOKEN=<YOUR TOKEN VALUE>
 ```
+
 ##### Token to ingest data
 Create a Dynatrace token with the following scope:
 * ingest metrics
